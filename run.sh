@@ -67,18 +67,53 @@ build_caffe()
     make_build_dir $buildPath $rebuild
 
     cd build
-    cmake -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_PREFIX_PATH="/usr/local/cudnn_v5.1_cuda8.0;${cudapath};/home/shhs/env/opencv3_2_sys" -DCUDNN_ROOT=$cudnnpath ..
+    cmake -DCMAKE_BUILD_TYPE="$buildType" \
+          -DCMAKE_PREFIX_PATH="/usr/local/cudnn_v5.1_cuda8.0;${cudapath};/home/shhs/env/opencv3_2_sys" \
+          -DCUDNN_ROOT=$cudnnpath \
+          ..
     make -j8
-    cd ../..
+    cd ../../../
+}
+
+build_gSLICr()
+{
+    rebuild=$1
+    buildType=$2
+
+    cudapath=/usr/local/cuda-8.0
+    export LD_LIBRARY_PATH="$cudapath"/lib64:$LD_LIBRARY_PATH
+
+    cd lib/gSLICr
+    buildPath=build
+    make_build_dir $buildPath $rebuild
+
+    cd $buildPath
+    cmake -DCMAKE_BUILD_TYPE="$buildType" \
+          -DCMAKE_PREFIX_PATH="${cudapath};/home/shhs/env/opencv3_2_sys" \
+          ..
+    make
+
+    cd ../../../
 }
 
 if [ "$1" = build ]
 then
 #   ./run.sh build norebuild
-#   python: python3.5
-#   The version of python must be compatible with boost.
+#   python: python2.7
     rebuild=$2
-    build_caffe "$rebuild" Debug
+    buildType=Debug
+    build_caffe "$rebuild" $buildType
+    build_gSLICr "$rebuild" $buildType
 
+elif [ "$1" = DAVISdataset ]
+then
+#   ./run.sh DAVISdataset
+    cd data
+#    download DAVIS-data.zip
+    ./get_davis.sh
+    if [ -d DAVIS ]
+    then
+        echo "unzip DAVIS-data.zip in DAVIS dir"
+    fi
 
 fi
