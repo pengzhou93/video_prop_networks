@@ -56,13 +56,18 @@ make_build_dir()
 build_caffe()
 {
     rebuild=$1
+    buildType=$2
+
+    cudapath=/usr/local/cuda-8.0
+    cudnnpath=/usr/local/cudnn_v5.1_cuda8.0
+    export LD_LIBRARY_PATH="$cudnnpath"/lib64:"$cudapath"/lib64
 
     cd lib/caffe
     buildPath=build
     make_build_dir $buildPath $rebuild
 
     cd build
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE="$buildType" -DCMAKE_PREFIX_PATH="/usr/local/cudnn_v5.1_cuda8.0;${cudapath};/home/shhs/env/opencv3_2_sys" -DCUDNN_ROOT=$cudnnpath ..
     make -j8
     cd ../..
 }
@@ -73,7 +78,7 @@ then
 #   python: python3.5
 #   The version of python must be compatible with boost.
     rebuild=$2
-    build_caffe "$rebuild"
+    build_caffe "$rebuild" Debug
 
 
 fi
