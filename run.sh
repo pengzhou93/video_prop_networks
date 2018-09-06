@@ -109,11 +109,45 @@ elif [ "$1" = DAVISdataset ]
 then
 #   ./run.sh DAVISdataset
     cd data
+    if [ ! -d DAVIS ]
+    then
+        echo "create DAVIS dir"
+        echo "unzip DAVIS-data.zip -d DAVIS"
+    fi
+
 #    download DAVIS-data.zip
     ./get_davis.sh
-    if [ -d DAVIS ]
+
+
+elif [ "$1" = extractSuperpixels ]
+then
+#   ./run.sh extractSuperpixels rebuildno debug
+
+    if [ ! -d "data/gslic_spixels" ]
     then
-        echo "unzip DAVIS-data.zip in DAVIS dir"
+        echo "**superpixel indices will store in this dir."
+    fi
+
+    rebuild=$2
+    buildType=Debug
+    build_caffe "$rebuild" $buildType
+    build_gSLICr "$rebuild" $buildType
+
+    if [ $3 = debug ]
+    then
+#       lib/gSLICr/compute_superpixels.cpp
+        gdbserver localhost:8080 ./lib/gSLICr/build/compute_superpixels \
+                    ./data/DAVIS/JPEGImages/480p/ \
+                    ./data/fold_list/img_list.txt \
+                    ./data/gslic_spixels/ \
+                    12000
+    else
+        ./lib/gSLICr/build/compute_superpixels \
+                    ./data/DAVIS/JPEGImages/480p/ \
+                    ./data/fold_list/img_list.txt \
+                    ./data/gslic_spixels/ \
+                    12000
+
     fi
 
 fi
