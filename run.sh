@@ -14,7 +14,7 @@ insert_debug_string()
 
     value=`sed -n ${line}p "$file"`
 
-    if [ "$value" != "$debug_string" ] && [ "$debug" = debug ]
+    if [ "$value" != "$debug_string" ]
     then
     echo "++Insert $debug_string in line_${line}++"
 
@@ -149,5 +149,27 @@ then
                     12000
 
     fi
+
+elif [ "$1" = DataPreparation ]
+then
+#   ./run.sh DataPreparation rebuildno debug
+
+    rebuild=$2
+    buildType=Debug
+    build_caffe "$rebuild" $buildType
+    build_gSLICr "$rebuild" $buildType
+
+    cd seg_propagation/
+    file=prepare_train_data.py
+    if [ $3 = debug ]
+    then
+        line=14
+        insert_debug_string $file $line "$debug_str"
+        python $file
+        delete_debug_string $file $line "$debug_str"
+    else
+        python $file
+    fi
+
 
 fi
